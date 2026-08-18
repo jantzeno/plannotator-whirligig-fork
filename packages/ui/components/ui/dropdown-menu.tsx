@@ -3,6 +3,7 @@ import { Check, ChevronRight, Circle } from "lucide-react";
 import type * as React from "react";
 
 import { cn } from "../../lib/utils";
+import { useOverlayRoot } from "../OverlayPortal";
 
 /**
  * DropdownMenu — Base UI Menu-backed primitive (shadcn-style). Replaces the plan app's
@@ -12,8 +13,9 @@ function DropdownMenu({ ...props }: MenuPrimitive.Root.Props) {
   return <MenuPrimitive.Root {...props} />;
 }
 
-function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
-  return <MenuPrimitive.Portal {...props} />;
+function DropdownMenuPortal({ container, ...props }: MenuPrimitive.Portal.Props) {
+  const overlayRoot = useOverlayRoot();
+  return <MenuPrimitive.Portal container={container ?? overlayRoot ?? undefined} {...props} />;
 }
 
 function DropdownMenuTrigger({ ...props }: MenuPrimitive.Trigger.Props) {
@@ -21,7 +23,7 @@ function DropdownMenuTrigger({ ...props }: MenuPrimitive.Trigger.Props) {
 }
 
 const dropdownMenuPopupClassName =
-  "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground origin-[var(--transform-origin)] transition-[opacity,scale] duration-150 data-[starting-style]:opacity-0 data-[starting-style]:scale-95 data-[ending-style]:opacity-0 data-[ending-style]:scale-95";
+  "z-[var(--pn-layer-popover)] min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground origin-[var(--transform-origin)] transition-[opacity,scale] duration-150 data-[starting-style]:opacity-0 data-[starting-style]:scale-95 data-[ending-style]:opacity-0 data-[ending-style]:scale-95";
 
 function DropdownMenuContent({
   className,
@@ -33,9 +35,9 @@ function DropdownMenuContent({
 }: MenuPrimitive.Popup.Props &
   Pick<MenuPrimitive.Positioner.Props, "side" | "sideOffset" | "align" | "alignOffset">) {
   return (
-    <MenuPrimitive.Portal>
+    <DropdownMenuPortal>
       <MenuPrimitive.Positioner
-        className="isolate z-50 outline-none"
+        className="isolate z-[var(--pn-layer-popover)] outline-none"
         side={side}
         sideOffset={sideOffset}
         align={align}
@@ -47,7 +49,7 @@ function DropdownMenuContent({
           {...props}
         />
       </MenuPrimitive.Positioner>
-    </MenuPrimitive.Portal>
+    </DropdownMenuPortal>
   );
 }
 
@@ -217,9 +219,9 @@ function DropdownMenuSubContent({
 }: MenuPrimitive.Popup.Props &
   Pick<MenuPrimitive.Positioner.Props, "side" | "sideOffset" | "align" | "alignOffset">) {
   return (
-    <MenuPrimitive.Portal>
+    <DropdownMenuPortal>
       <MenuPrimitive.Positioner
-        className="isolate z-50 outline-none"
+        className="isolate z-[var(--pn-layer-popover)] outline-none"
         side={side}
         sideOffset={sideOffset}
         align={align}
@@ -231,7 +233,7 @@ function DropdownMenuSubContent({
           {...props}
         />
       </MenuPrimitive.Positioner>
-    </MenuPrimitive.Portal>
+    </DropdownMenuPortal>
   );
 }
 

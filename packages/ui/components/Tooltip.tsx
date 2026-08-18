@@ -1,5 +1,6 @@
 import React from 'react';
 import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip';
+import { useOverlayRoot } from './OverlayPortal';
 
 /**
  * One tooltip timing for every surface (owner's design-system ruling q4): open
@@ -67,7 +68,7 @@ interface TooltipProps {
    */
   shouldOpen?: (trigger: Element) => boolean;
   /**
-   * Where the popup is portaled. Unset: the document body. A trigger inside a
+   * Where the popup is portaled. Unset: the shared overlay root. A trigger inside a
    * native modal `<dialog>` needs the dialog here, or the popup is drawn
    * under the dialog's top layer.
    */
@@ -93,6 +94,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   container,
   escapePassesThrough = false,
 }) => {
+  const overlayRoot = useOverlayRoot();
   const provider = React.useContext(TooltipProviderContext);
   const disableHoverablePopup = provider?.disableHoverablePopup ?? false;
   // Under a provider, an unset delay takes the provider's; alone, the shared default.
@@ -123,8 +125,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
       }
     >
       <BaseTooltip.Trigger render={children} delay={triggerDelay} />
-      <BaseTooltip.Portal container={container ?? undefined}>
-        {/* Above the annotation toolbar (z-[100]), so a tooltip that flips toward it is never tucked under it. */}
+      <BaseTooltip.Portal container={container ?? overlayRoot ?? undefined}>
+        {/* Above the annotation toolbar, so a tooltip that flips toward it is never tucked under it. */}
         <BaseTooltip.Positioner side={side} align={align} sideOffset={sideOffset} className="isolate z-[110]">
           {/* A borderless float (owner's design-system ruling q4): the shadow (--float-shadow, theme.css) separates
               it from the page. The 1px border stays, transparent, so forced colors (Windows High Contrast), which

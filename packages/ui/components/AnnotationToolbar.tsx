@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { AnnotationType } from "../types";
-import { createPortal } from "react-dom";
 import { useDismissOnOutsideAndEscape } from "../hooks/useDismissOnOutsideAndEscape";
 import { type QuickLabel, getQuickLabels, quickLabelIndexForDigit, THUMBS_UP_LABEL } from "../utils/quickLabels";
 import { copyTextToClipboard } from "../utils/clipboard";
@@ -8,6 +7,7 @@ import { acquireTypeToCommentCapture } from "../shortcuts/plan-review/annotation
 import { FloatingQuickLabelPicker } from "./FloatingQuickLabelPicker";
 import { FloatingSelectionActionsPicker } from "./SelectionActionsDropdown";
 import { buildSelectionActionContext, type SelectionAction } from "../utils/selectionActions";
+import { OverlayPortal } from "./OverlayPortal";
 import { HostTitle } from './HostTitle';
 
 type PositionMode = 'center-above' | 'top-right';
@@ -231,11 +231,11 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
       : 'annotation-toolbar-in 0.15s ease-out',
   };
 
-  return createPortal(
+  const content = (
     <div
       ref={toolbarRef}
       data-pn-annotation-toolbar-centered={isCentered ? 'true' : undefined}
-      className="annotation-toolbar fixed z-[100] bg-popover border border-border rounded-lg shadow-2xl"
+      className="annotation-toolbar fixed z-[var(--pn-layer-popover)] bg-popover border border-border rounded-lg shadow-2xl"
       style={style}
       onMouseDown={(e) => e.stopPropagation()}
       onMouseEnter={onMouseEnter}
@@ -342,9 +342,9 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
           className="text-muted-foreground hover:bg-muted"
         />
       </div>
-    </div>,
-    document.body
+    </div>
   );
+  return <OverlayPortal>{content}</OverlayPortal>;
 };
 
 // Icons

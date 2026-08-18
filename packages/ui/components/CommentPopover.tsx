@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback, useId } from 'react';
-import { createPortal } from 'react-dom';
 import type { ImageAttachment } from '../types';
 import { AttachmentsButton } from './AttachmentsButton';
 import { useDraggable } from '../hooks/useDraggable';
 import { SparklesIcon } from './SparklesIcon';
+import { OverlayPortal } from './OverlayPortal';
 import { hasUnsavedCommentContent } from '../utils/commentContent';
 import { isCommentSubmitKey } from '../utils/commentSubmitKey';
 import { useConfigValue } from '../config/useConfig';
@@ -629,10 +629,10 @@ export const CommentPopover: React.FC<CommentPopoverProps> = ({
   ) : null;
 
   if (mode === 'dialog') {
-    return createPortal(
+    const content = (
       <div
         data-comment-popover="true"
-        className="pn-visible-viewport-overlay z-[100] flex items-center justify-center"
+        className="pn-visible-viewport-overlay z-[var(--pn-layer-modal)] flex items-center justify-center"
       >
         {/* Backdrop */}
         <button
@@ -772,15 +772,15 @@ export const CommentPopover: React.FC<CommentPopoverProps> = ({
             </div>
           </div>
         </div>
-      </div>,
-      document.body
+      </div>
     );
+    return <OverlayPortal modal>{content}</OverlayPortal>;
   }
 
   // Popover mode
   if (!position) return null;
 
-  return createPortal(
+  const content = (
     <>
       {offscreen && (
         <button
@@ -788,7 +788,7 @@ export const CommentPopover: React.FC<CommentPopoverProps> = ({
           data-popover-layer="true"
           onClick={scrollToPopover}
           title="Scroll back to your open comment"
-          className={`fixed left-1/2 -translate-x-1/2 z-[101] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-popover border border-border shadow-lg text-xs text-muted-foreground hover:text-foreground transition-colors ${offscreen === 'above' ? 'top-3' : 'bottom-3'}`}
+          className={`fixed left-1/2 -translate-x-1/2 z-[var(--pn-layer-critical)] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-popover border border-border shadow-lg text-xs text-muted-foreground hover:text-foreground transition-colors ${offscreen === 'above' ? 'top-3' : 'bottom-3'}`}
         >
           {offscreen === 'above' ? <ChevronUpIcon /> : <ChevronDownIcon />}
           <span>Open comment</span>
@@ -797,7 +797,7 @@ export const CommentPopover: React.FC<CommentPopoverProps> = ({
       <div
         ref={popoverRef}
         data-comment-popover="true"
-      className={`fixed z-[100] bg-popover border border-border rounded-xl shadow-2xl flex flex-col${yieldClass}`}
+      className={`fixed z-[var(--pn-layer-popover)] bg-popover border border-border rounded-xl shadow-2xl flex flex-col${yieldClass}`}
       style={dragPosition
         ? {
             top: dragPosition.top,
@@ -926,9 +926,9 @@ export const CommentPopover: React.FC<CommentPopoverProps> = ({
         </div>
       </div>
       </div>
-    </>,
-    document.body
+    </>
   );
+  return <OverlayPortal>{content}</OverlayPortal>;
 };
 
 

@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
+import { useOverlayRoot } from './OverlayPortal';
 
 export const ANNOTATION_SELECTORS = [
   '.annotation-toolbar',
@@ -32,6 +33,7 @@ export const PopoutDialog: React.FC<PopoutDialogProps> = ({
   children,
   dataAttributes,
 }) => {
+  const overlayRoot = useOverlayRoot();
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent) => {
       const target = e.target as Element;
@@ -73,17 +75,17 @@ export const PopoutDialog: React.FC<PopoutDialogProps> = ({
 
   return (
     <Dialog.Root open={open} onOpenChange={handleOpenChange} modal={false}>
-      <Dialog.Portal container={container ?? undefined}>
+      <Dialog.Portal container={container ?? overlayRoot ?? undefined}>
         {/* Non-modal dialogs render no library backdrop, so we use a plain
             div for the dark scrim + blur while keeping annotation toolbars
             (which portal outside the dialog) interactive. */}
         <div
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[var(--pn-layer-modal)] bg-black/50 backdrop-blur-[2px]"
           onClick={handleBackdropClick}
           aria-hidden="true"
         />
         <Dialog.Popup
-          className={`fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-background border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden ${className ?? 'w-[calc(100vw-4rem)] max-w-[min(calc(100vw-4rem),1500px)] max-h-[calc(100vh-4rem)]'}`}
+          className={`fixed left-1/2 top-1/2 z-[var(--pn-layer-modal)] -translate-x-1/2 -translate-y-1/2 bg-background border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden ${className ?? 'w-[calc(100vw-4rem)] max-w-[min(calc(100vw-4rem),1500px)] max-h-[calc(100vh-4rem)]'}`}
           data-popout="true"
           initialFocus={false}
           {...dataAttributes}
