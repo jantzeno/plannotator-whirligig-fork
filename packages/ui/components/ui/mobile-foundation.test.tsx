@@ -78,7 +78,11 @@ describe('shared mobile control foundation', () => {
     const visibleViewport = document.querySelector<HTMLElement>('.pn-visible-viewport-overlay');
     const popup = document.querySelector<HTMLElement>('[role="dialog"]');
     const close = document.querySelector<HTMLButtonElement>('button[data-pn-touch-target-icon]');
+    const overlayRoot = document.querySelector<HTMLElement>('[data-pn-overlay-root="true"]');
 
+    expect(overlayRoot?.parentElement).toBe(document.body);
+    expect(overlayRoot?.contains(popup)).toBe(true);
+    expect(document.documentElement.getAttribute('data-pn-modal-open')).toBe('true');
     expect(visibleViewport).not.toBeNull();
     expect(visibleViewport?.className).toContain('pointer-events-none');
     expect(popup?.className).toContain('pointer-events-auto');

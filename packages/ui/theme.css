@@ -608,6 +608,44 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/*
+ * One layer scale for every document/review host. Portaled surfaces live in a
+ * dedicated root above application chrome, then order themselves within that
+ * isolated stacking context. Avoid introducing new numeric z-index values for
+ * floating UI; extend this scale instead.
+ */
+:root {
+  --pn-layer-content: 0;
+  --pn-layer-chrome: 10;
+  --pn-layer-floating: 20;
+  --pn-layer-modal: 40;
+  --pn-layer-popover: 50;
+  --pn-layer-critical: 60;
+  --pn-layer-overlay-root: 2000;
+}
+
+#pn-overlay-root[data-pn-overlay-root='true'] {
+  position: fixed;
+  inset: 0;
+  z-index: var(--pn-layer-overlay-root);
+  isolation: isolate;
+  pointer-events: none;
+}
+
+/* The root itself never becomes a full-viewport hit target. Portaled children
+ * opt back into hit testing, while an explicit utility such as
+ * `pointer-events-none` still wins because :where() adds no specificity. */
+:where(#pn-overlay-root[data-pn-overlay-root='true'] > *) {
+  pointer-events: auto;
+}
+
+/* A sandboxed iframe is its own browsing context. While a parent modal is
+ * present, remove only the raw-HTML viewer frame from hit testing so a visible
+ * parent dialog/button always receives the pointer. */
+html[data-pn-modal-open='true'] iframe[data-pn-html-viewer='true'] {
+  pointer-events: none !important;
+}
+
 /* Type scale — fonts excluded on purpose (themes own --font-sans/--font-mono) */
 @theme {
   --text-sm: 0.875rem; --text-sm--line-height: 1.45;

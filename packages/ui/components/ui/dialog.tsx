@@ -2,10 +2,14 @@ import * as React from "react";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { X } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { ModalIsolationBoundary, useOverlayRoot } from "../OverlayPortal";
 
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
-const DialogPortal = DialogPrimitive.Portal;
+function DialogPortal({ container, ...props }: DialogPrimitive.Portal.Props) {
+  const overlayRoot = useOverlayRoot();
+  return <DialogPrimitive.Portal container={container ?? overlayRoot ?? undefined} {...props} />;
+}
 const DialogClose = DialogPrimitive.Close;
 
 const DialogOverlay = React.forwardRef<
@@ -16,7 +20,7 @@ const DialogOverlay = React.forwardRef<
     ref={ref}
     data-slot="dialog-overlay"
     className={cn(
-      "fixed inset-0 z-[110] bg-black/55 backdrop-blur-[2px]",
+      "fixed inset-0 z-[var(--pn-layer-modal)] bg-black/55 backdrop-blur-[2px]",
       "transition-opacity duration-200",
       "data-starting-style:opacity-0 data-ending-style:opacity-0",
       className,
@@ -36,12 +40,13 @@ const DialogContent = React.forwardRef<
   }
 >(({ backdropClassName, className, children, hideClose, ...props }, ref) => (
   <DialogPortal>
+    <ModalIsolationBoundary />
     <DialogOverlay className={backdropClassName} />
-    <div className="pn-visible-viewport-overlay z-[110] pointer-events-none flex items-center justify-center">
+    <div className="pn-visible-viewport-overlay z-[var(--pn-layer-modal)] pointer-events-none flex items-center justify-center">
       <DialogPrimitive.Popup
         ref={ref}
         className={cn(
-          "relative pointer-events-auto z-[110] w-full min-h-0",
+          "relative pointer-events-auto z-[var(--pn-layer-modal)] w-full min-h-0",
           "max-w-4xl max-h-[min(640px,85vh,100%)]",
           "flex flex-col overflow-hidden",
           "rounded-2xl border border-border bg-popover text-popover-foreground",

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip';
+import { useOverlayRoot } from './OverlayPortal';
 
 /**
  * TooltipProvider keeps the Radix-era prop names (`delayDuration`,
@@ -56,13 +57,14 @@ export const Tooltip: React.FC<TooltipProps> = ({
   wide = false,
 }) => {
   const disableHoverablePopup = React.useContext(DisableHoverablePopupContext);
+  const overlayRoot = useOverlayRoot();
   return (
     <BaseTooltip.Root disableHoverablePopup={disableHoverablePopup}>
       <BaseTooltip.Trigger render={children} delay={delayDuration} />
-      <BaseTooltip.Portal>
-        <BaseTooltip.Positioner side={side} align={align} sideOffset={sideOffset} className="isolate z-50">
+      <BaseTooltip.Portal container={overlayRoot ?? undefined}>
+        <BaseTooltip.Positioner side={side} align={align} sideOffset={sideOffset} className="isolate z-[var(--pn-layer-popover)]">
           <BaseTooltip.Popup
-            className={`z-50 px-2 py-1 text-xs bg-popover text-popover-foreground border border-border rounded shadow-md origin-[var(--transform-origin)] transition-[opacity,scale] duration-150 ease-out data-[starting-style]:opacity-0 data-[starting-style]:scale-95 data-[ending-style]:opacity-0 data-[ending-style]:scale-95 ${
+            className={`z-[var(--pn-layer-popover)] px-2 py-1 text-xs bg-popover text-popover-foreground border border-border rounded shadow-md origin-[var(--transform-origin)] transition-[opacity,scale] duration-150 ease-out data-[starting-style]:opacity-0 data-[starting-style]:scale-95 data-[ending-style]:opacity-0 data-[ending-style]:scale-95 ${
               wide
                 ? 'max-w-[min(260px,calc(100vw-1rem))] leading-snug whitespace-normal [overflow-wrap:anywhere]'
                 : 'whitespace-nowrap'

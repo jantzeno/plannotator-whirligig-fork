@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { createPortal } from 'react-dom';
 import { type QuickLabel, getQuickLabels } from '../utils/quickLabels';
 import { QuickLabelDropdown } from './QuickLabelDropdown';
+import { OverlayPortal } from './OverlayPortal';
 
 interface FloatingQuickLabelPickerProps {
   anchorEl: HTMLElement;
@@ -109,12 +109,12 @@ export const FloatingQuickLabelPicker: React.FC<FloatingQuickLabelPickerProps> =
 
   const animName = position.flipAbove ? 'qlp-in-above' : 'qlp-in-below';
 
-  return createPortal(
+  const content = (
     <div
       ref={ref}
       data-quick-label-picker
       data-floating-picker="true"
-      className="fixed z-[100]"
+      className="fixed z-[var(--pn-layer-critical)]"
       style={{
         top: position.top,
         left: position.left,
@@ -138,7 +138,7 @@ export const FloatingQuickLabelPicker: React.FC<FloatingQuickLabelPickerProps> =
       <div className="bg-popover border border-border/60 rounded-lg shadow-xl overflow-hidden">
         <QuickLabelDropdown labels={quickLabels} onSelect={onSelect} animate />
       </div>
-    </div>,
-    document.body
+    </div>
   );
+  return <OverlayPortal>{content}</OverlayPortal>;
 };

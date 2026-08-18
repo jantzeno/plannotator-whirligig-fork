@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
 import { ToolbarState } from '../hooks/useAnnotationToolbar';
 import { useTabIndent } from '../hooks/useTabIndent';
 import { formatLineRange, formatTokenContext } from '../utils/formatLineRange';
 import { AskAIInput } from './AskAIInput';
 import { SparklesIcon } from '@plannotator/ui/components/SparklesIcon';
+import { OverlayPortal } from '@plannotator/ui/components/OverlayPortal';
 import { ConventionalLabelPicker, type LabelDef } from './ConventionalLabelPicker';
 import type { ConventionalLabel, ConventionalDecoration } from '@plannotator/ui/types';
 import type { AIChatEntry } from '../hooks/useAIChat';
@@ -121,7 +121,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
             position: 'fixed',
             top: dragPosition.top,
             left: dragPosition.left,
-            zIndex: 1000,
+            zIndex: 'var(--pn-layer-popover)',
             maxHeight: visibleBounds.height,
             overflowY: 'auto',
           }
@@ -139,7 +139,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
               ),
             ),
             transform: 'translateX(-50%)',
-            zIndex: 1000,
+            zIndex: 'var(--pn-layer-popover)',
             maxHeight: visibleBounds.height,
             overflowY: 'auto',
           }
@@ -315,7 +315,7 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
     return content;
   }
 
-  return createPortal(content, document.body);
+  return <OverlayPortal>{content}</OverlayPortal>;
 };
 
 const ExpandIcon = () => (
