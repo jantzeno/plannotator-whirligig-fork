@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback, useId } from 'react';
-import { createPortal } from 'react-dom';
 import type { ImageAttachment } from '../types';
 import { AttachmentsButton } from './AttachmentsButton';
 import { submitHint } from '../utils/platform';
 import { useDraggable } from '../hooks/useDraggable';
 import { SparklesIcon } from './SparklesIcon';
+import { OverlayPortal } from './OverlayPortal';
 import { hasUnsavedCommentContent } from '../utils/commentContent';
 import { useSkillReferenceAutocomplete } from '../hooks/useSkillReferenceAutocomplete';
 import { HumanOnlySkillNotice, SkillReferenceMenu } from './SkillReferenceMenu';
@@ -522,10 +522,10 @@ export const CommentPopover: React.FC<CommentPopoverProps> = ({
   const canAskAI = !!onAskAI && !askAIDisabled && text.trim().length > 0;
 
   if (mode === 'dialog') {
-    return createPortal(
+    const content = (
       <div
         data-comment-popover="true"
-        className="pn-visible-viewport-overlay z-[100] flex items-center justify-center"
+        className="pn-visible-viewport-overlay z-[var(--pn-layer-modal)] flex items-center justify-center"
       >
         {/* Backdrop */}
         <button
@@ -656,15 +656,15 @@ export const CommentPopover: React.FC<CommentPopoverProps> = ({
             </div>
           </div>
         </div>
-      </div>,
-      document.body
+      </div>
     );
+    return <OverlayPortal modal>{content}</OverlayPortal>;
   }
 
   // Popover mode
   if (!position) return null;
 
-  return createPortal(
+  const content = (
     <>
       {offscreen && (
         <button
@@ -672,7 +672,7 @@ export const CommentPopover: React.FC<CommentPopoverProps> = ({
           data-popover-layer="true"
           onClick={scrollToPopover}
           title="Scroll back to your open comment"
-          className={`fixed left-1/2 -translate-x-1/2 z-[101] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-popover border border-border shadow-lg text-xs text-muted-foreground hover:text-foreground transition-colors ${offscreen === 'above' ? 'top-3' : 'bottom-3'}`}
+          className={`fixed left-1/2 -translate-x-1/2 z-[var(--pn-layer-critical)] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-popover border border-border shadow-lg text-xs text-muted-foreground hover:text-foreground transition-colors ${offscreen === 'above' ? 'top-3' : 'bottom-3'}`}
         >
           {offscreen === 'above' ? <ChevronUpIcon /> : <ChevronDownIcon />}
           <span>Open comment</span>
@@ -681,29 +681,29 @@ export const CommentPopover: React.FC<CommentPopoverProps> = ({
       <div
         ref={popoverRef}
         data-comment-popover="true"
-      className={`fixed z-[100] bg-popover border border-border rounded-xl shadow-2xl flex flex-col${yieldClass}`}
-      style={dragPosition
-        ? {
-            top: dragPosition.top,
-            left: dragPosition.left,
-            width: position.width,
-            maxHeight: visibleBounds.height,
-            overflowY: 'auto',
-          }
-        : {
-            top: position.top,
-            left: position.left,
-            width: position.width,
-            maxHeight: position.maxHeight,
-            overflowY: 'auto',
-            ...(position.flipAbove ? { transform: 'translateY(-100%)' } : {}),
-            animation: position.flipAbove
-              ? 'comment-popover-in-above 0.15s ease-out'
-              : 'comment-popover-in 0.15s ease-out',
-          }
-      }
-      onPointerDown={(e) => e.stopPropagation()}
-    >
+        className={`fixed z-[var(--pn-layer-popover)] bg-popover border border-border rounded-xl shadow-2xl flex flex-col${yieldClass}`}
+        style={dragPosition
+          ? {
+              top: dragPosition.top,
+              left: dragPosition.left,
+              width: position.width,
+              maxHeight: visibleBounds.height,
+              overflowY: 'auto',
+            }
+          : {
+              top: position.top,
+              left: position.left,
+              width: position.width,
+              maxHeight: position.maxHeight,
+              overflowY: 'auto',
+              ...(position.flipAbove ? { transform: 'translateY(-100%)' } : {}),
+              animation: position.flipAbove
+                ? 'comment-popover-in-above 0.15s ease-out'
+                : 'comment-popover-in 0.15s ease-out',
+            }
+        }
+        onPointerDown={(e) => e.stopPropagation()}
+      >
       <style>{`
         @keyframes comment-popover-in {
           from { opacity: 0; transform: translateY(-8px); }
@@ -805,9 +805,9 @@ export const CommentPopover: React.FC<CommentPopoverProps> = ({
         </div>
       </div>
       </div>
-    </>,
-    document.body
+    </>
   );
+  return <OverlayPortal>{content}</OverlayPortal>;
 };
 
 // ---------------------------------------------------------------------------

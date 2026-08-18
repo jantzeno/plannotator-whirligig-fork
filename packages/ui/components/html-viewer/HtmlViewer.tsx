@@ -642,6 +642,7 @@ export const HtmlViewer = forwardRef<ViewerHandle, HtmlViewerProps>(
             )}
             <iframe
               ref={iframeRef}
+              data-pn-html-viewer="true"
               srcDoc={srcdoc}
               sandbox="allow-scripts"
               style={{

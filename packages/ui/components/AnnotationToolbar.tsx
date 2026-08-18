@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { AnnotationType } from "../types";
-import { createPortal } from "react-dom";
 import { useDismissOnOutsideAndEscape } from "../hooks/useDismissOnOutsideAndEscape";
 import { type QuickLabel, getQuickLabels } from "../utils/quickLabels";
 import { copyTextToClipboard } from "../utils/clipboard";
 import { FloatingQuickLabelPicker } from "./FloatingQuickLabelPicker";
+import { OverlayPortal } from "./OverlayPortal";
 
 type PositionMode = 'center-above' | 'top-right';
 
@@ -178,10 +178,10 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
       : 'annotation-toolbar-in 0.15s ease-out',
   };
 
-  return createPortal(
+  const content = (
     <div
       ref={toolbarRef}
-      className="annotation-toolbar fixed z-[100] bg-popover border border-border rounded-lg shadow-2xl"
+      className="annotation-toolbar fixed z-[var(--pn-layer-popover)] bg-popover border border-border rounded-lg shadow-2xl"
       style={style}
       onMouseDown={(e) => e.stopPropagation()}
       onMouseEnter={onMouseEnter}
@@ -256,9 +256,9 @@ export const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({
           className="text-muted-foreground hover:bg-muted"
         />
       </div>
-    </div>,
-    document.body
+    </div>
   );
+  return <OverlayPortal>{content}</OverlayPortal>;
 };
 
 // Icons

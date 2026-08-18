@@ -12,9 +12,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: test-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -92,6 +97,8 @@ jobs:
           packages/ui/components/ThemeProvider.favicon.test.tsx
           packages/ui/components/CommentPopover.skillReferences.test.tsx
           packages/ui/components/SkillReferenceMenu.placement.test.tsx
+          packages/ui/components/OverlayPortal.test.tsx
+          packages/ui/components/ui/mobile-foundation.test.tsx
           packages/ui/components/sidebar/FileBrowser.test.ts
           packages/editor/editableDocumentsHook.test.tsx
           packages/review-editor/components/ReviewSubmissionDialog.ui.test.tsx
@@ -187,6 +194,7 @@ jobs:
   guides-show:
     name: guides.show viewer (budgets + pinned manifest)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -229,11 +237,8 @@ jobs:
         if: steps.gate.outputs.run == 'true'
         run: bun install --frozen-lockfile
 
-      # The release workflow (guides-show-deploy.yml) refuses to publish when
-      # the viewer build blows its size budgets or the checked-in manifest no
-      # longer matches it, but that gate fires at the tag. The manifest pin is
-      # compiled into the release binaries independently of the viewer deploy,
-      # so a budget or manifest break has to surface on the PR that causes it.
+      # The manifest pin is consumed outside this viewer package, so size-budget
+      # or manifest drift has to surface in the test run for the PR that causes it.
       # Regenerate with `bun run --cwd apps/guides-show build:viewer &&
       # bun run --cwd apps/guides-show sync:manifest`.
       - name: Build viewer
@@ -248,14 +253,14 @@ jobs:
       # lockfile (macOS and Linux produce identical hashes from a clean install),
       # but a drifted local environment silently builds different bytes: a bun
       # store with stale duplicate package versions reproduced exactly that. This
-      # Linux build is the authority the pin must match, so publish its manifest;
+      # Linux build is the authority the pin must match, so retain its manifest;
       # when the check below fails and a fresh local regen still disagrees,
       # download this artifact to apps/guides-show/dist/viewer/manifest.json, run
       # `bun run --cwd apps/guides-show sync:manifest`, commit the result, and
       # rebuild your environment (rm -rf node_modules && bun install --frozen-lockfile).
-      - name: Publish built viewer manifest for pin regeneration
+      - name: Upload built viewer manifest for pin regeneration
         if: always() && steps.gate.outputs.run == 'true'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v6.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: guide-viewer-manifest
           path: apps/guides-show/dist/viewer/manifest.json
@@ -271,6 +276,7 @@ jobs:
     # never touches the runner's actual agent installations or user data.
     name: Uninstall lifecycle (Windows)
     runs-on: windows-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -293,6 +299,7 @@ jobs:
     # crashes before the plan review UI opens.
     name: Pi extension AI runtime (Windows)
     runs-on: windows-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -332,6 +339,7 @@ jobs:
     # any regression of #506 (or similar cmd-parser bugs) fails CI.
     name: install.cmd (Windows integration)
     runs-on: windows-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -589,6 +597,7 @@ jobs:
     # installer config lookup happens before any shared runtime code is loaded.
     name: install.ps1 (Windows integration)
     runs-on: windows-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:

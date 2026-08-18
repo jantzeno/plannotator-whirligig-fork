@@ -1985,7 +1985,7 @@ diffs-container {
 /* Annotation toolbar for code review */
 .review-toolbar {
   position: absolute;
-  z-index: 100;
+  z-index: var(--pn-layer-popover);
   background: var(--popover);
   border: 1px solid var(--border);
   border-radius: var(--radius);
