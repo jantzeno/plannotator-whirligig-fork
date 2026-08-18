@@ -43,6 +43,10 @@ configurePlannotatorUI({
 
 Anything you don't pass keeps Plannotator's default. A few component-specific overrides (e.g. an "open in editor" diff action) are passed as props where you render that component.
 
+### Host-framed AI chat (`DocumentAIChatPanel`)
+
+Hosts can reuse the existing chat transcript and composer without Plannotator's provider picker. `showProviderBar`, `emptyState`, `inputPlaceholder`, and `isInputDisabled` are optional props; omitting them preserves the standard document-chat UI exactly.
+
 ### Resize-handle seams (`ResizeHandle` / `useResizablePanel`)
 
 The sidebar/panel resize handle exposes seams for hosts that want different edge interactions (e.g. no hover reveal, click-to-collapse). All default to today's behavior — pass nothing and it's unchanged.

@@ -9,7 +9,7 @@ import { NewChatButton } from './NewChatButton';
 import { SessionAskActions, SessionAskNote, SessionAskStatus, sessionAskErrorTone, type SessionAskAction } from './SessionAskNotice';
 import { submitHint } from '../../utils/platform';
 
-interface DocumentAIChatPanelProps {
+export interface DocumentAIChatPanelProps {
   messages: AIChatEntry[];
   isCreatingSession: boolean;
   isStreaming: boolean;
@@ -31,6 +31,11 @@ interface DocumentAIChatPanelProps {
    * while an answer is in flight. Absent: no button, the panel renders as before.
    */
   onNewChat?: () => void;
+  /** Host seams; omitted values preserve Plannotator's document-chat UI. */
+  showProviderBar?: boolean;
+  emptyState?: React.ReactNode;
+  inputPlaceholder?: string;
+  isInputDisabled?: boolean;
 }
 
 function truncate(text: string, max = 180): string {
@@ -79,6 +84,10 @@ export const DocumentAIChatPanel: React.FC<DocumentAIChatPanelProps> = ({
   onSessionAskAction,
   askSessionSetupHint,
   onNewChat,
+  showProviderBar = true,
+  emptyState,
+  inputPlaceholder = 'Ask about this document...',
+  isInputDisabled = false,
 }) => {
   // A session that is never interrupted (T3 Code): Stop only stops listening.
   const listenOnly = hasNonInterruptibleSession(aiProviders);
@@ -128,11 +137,11 @@ export const DocumentAIChatPanel: React.FC<DocumentAIChatPanelProps> = ({
                 <SparklesIcon className="w-5 h-5" />
               </div>
               <p className="text-xs">
-                {onAskGeneral ? (
+                {emptyState ?? (onAskGeneral ? (
                   <>Select text and click <strong>Ask AI</strong>, or ask a general question below.</>
                 ) : (
                   <>Select text and click <strong>Ask AI</strong>.</>
-                )}
+                ))}
               </p>
             </div>
           )}
@@ -168,26 +177,29 @@ export const DocumentAIChatPanel: React.FC<DocumentAIChatPanelProps> = ({
         </div>
       )}
 
-      <AIProviderBar
-        providers={aiProviders}
-        selectedProviderId={aiConfig?.providerId ?? null}
-        selectedModel={aiConfig?.model ?? null}
-        selectedReasoningEffort={aiConfig?.reasoningEffort ?? null}
-        onProviderChange={(providerId) => onAIConfigChange?.({ providerId })}
-        onModelChange={(model) => onAIConfigChange?.({ model })}
-        onReasoningEffortChange={(reasoningEffort) => onAIConfigChange?.({ reasoningEffort })}
-        setupHint={askSessionSetupHint}
-      />
+      {showProviderBar && (
+        <AIProviderBar
+          providers={aiProviders}
+          selectedProviderId={aiConfig?.providerId ?? null}
+          selectedModel={aiConfig?.model ?? null}
+          selectedReasoningEffort={aiConfig?.reasoningEffort ?? null}
+          onProviderChange={(providerId) => onAIConfigChange?.({ providerId })}
+          onModelChange={(model) => onAIConfigChange?.({ model })}
+          onReasoningEffortChange={(reasoningEffort) => onAIConfigChange?.({ reasoningEffort })}
+          setupHint={askSessionSetupHint}
+        />
+      )}
 
       {onAskGeneral && (
         <GeneralInput
           value={generalInput}
           onChange={setGeneralInput}
           onSubmit={handleGeneralSubmit}
-          disabled={isStreaming}
+          disabled={isStreaming || isInputDisabled}
           isStreaming={isStreaming}
           onStop={onStop}
           observationOnly={listenOnly}
+          placeholder={inputPlaceholder}
         />
       )}
     </div>
@@ -311,7 +323,8 @@ const GeneralInput: React.FC<{
   isStreaming?: boolean;
   onStop?: () => void;
   observationOnly?: boolean;
-}> = ({ value, onChange, onSubmit, disabled, isStreaming, onStop, observationOnly = false }) => {
+  placeholder?: string;
+}> = ({ value, onChange, onSubmit, disabled, isStreaming, onStop, observationOnly = false, placeholder }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -329,7 +342,7 @@ const GeneralInput: React.FC<{
           ref={textareaRef}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          placeholder="Ask about this document..."
+          placeholder={placeholder}
           rows={1}
           className="flex-1 px-2.5 py-1.5 bg-muted rounded-md text-xs text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:ring-1 focus:ring-primary/50 leading-relaxed"
           style={{ maxHeight: 120 }}
